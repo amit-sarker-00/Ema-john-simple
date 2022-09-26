@@ -10,7 +10,6 @@ const Shop = () => {
   const [cart, setCart] = useState([]);
 
   useEffect(() => {
-    console.log("product load before fetch", products);
     fetch("products.json")
       .then((res) => res.json())
       .then((data) => setProducts(data));
@@ -18,7 +17,6 @@ const Shop = () => {
   }, []);
 
   useEffect(() => {
-    console.log("Local storage first line");
     const storedCart = getStoredCart();
     const savedCart = [];
     for (const id in storedCart) {
@@ -30,13 +28,21 @@ const Shop = () => {
       }
     }
     setCart(savedCart);
-    // console.log("local storage finised");
   }, [products]);
-  const handleAddToCart = (product) => {
-    // cart.push(product)
-    const newCart = [...cart, product];
+  const handleAddToCart = (selectedProduct) => {
+    let newCart = [];
+    const exists = cart.find((product) => product.id === selectedProduct.id);
+    if (!exists) {
+      selectedProduct.quantity = 1;
+      newCart = [...cart, selectedProduct];
+    } else {
+      const rest = cart.filter((product) => product.id !== selectedProduct.id);
+      exists.quantity = exists.quantity + 1;
+      newCart = [...rest, exists];
+    }
+    // const newCart = [...cart, selectedProduct];
     setCart(newCart);
-    addToDb(product.id);
+    addToDb(selectedProduct.id);
   };
   return (
     <div className="shop-container">
